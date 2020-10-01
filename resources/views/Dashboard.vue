@@ -1,5 +1,9 @@
 <template>
   <div class="dashboard" height="100%">
+    <v-overlay :value="overlay"
+      ><p>Loading...</p>
+      <v-progress-circular indeterminate size="64"></v-progress-circular
+    ></v-overlay>
     <v-subheader class="grey--text">Dashboard</v-subheader>
     <v-container class="my-5">
       <v-layout row class="mb-3">
@@ -74,23 +78,27 @@ export default {
   data() {
     return {
       projects: [],
+      overlay: true,
     };
   },
   methods: {
     sortBy(prop) {
       this.projects.sort((a, b) => (a[prop] < b[prop] ? -1 : 1));
     },
+    fetchData: function () {
+      db.collection("projects").onSnapshot((res) => {
+        const changes = res.docChanges();
+        changes.forEach((change) => {
+          if (change.type === "added") {
+            this.projects.push({ ...change.doc.data(), id: change.doc.id });
+          }
+        });
+        this.overlay = false;
+      });
+    },
   },
   created() {
-    db.collection("projects").onSnapshot((res) => {
-      const changes = res.docChanges();
-
-      changes.forEach((change) => {
-        if (change.type === "added") {
-          this.projects.push({ ...change.doc.data(), id: change.doc.id });
-        }
-      });
-    });
+    this.fetchData();
   },
 };
 </script>

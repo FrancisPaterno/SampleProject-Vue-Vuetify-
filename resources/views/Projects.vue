@@ -1,6 +1,10 @@
 <template
     >
   <div class="projects">
+    <v-overlay :value="overlay"
+      ><p>Loading...</p>
+      <v-progress-circular indeterminate size="54"></v-progress-circular
+    ></v-overlay>
     <v-subheader class="grey--text">Projects</v-subheader>
 
     <v-expansion-panels
@@ -27,6 +31,7 @@ export default {
   data() {
     return {
       projects: [],
+      overlay: true,
     };
   },
   computed: {
@@ -45,6 +50,7 @@ export default {
           this.projects.push({ ...change.doc.data(), id: change.doc.id });
         }
       });
+      this.overlay = false;
     });
   },
 };
