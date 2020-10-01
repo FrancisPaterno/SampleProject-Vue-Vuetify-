@@ -4,7 +4,7 @@
     <v-subheader class="grey--text">Projects</v-subheader>
 
     <v-expansion-panels
-      ><v-expansion-panel v-for="project in myprojects" :key="project.title"
+      ><v-expansion-panel v-for="project in myprojects" :key="project.id"
         ><v-expansion-panel-header>{{
           project.title
         }}</v-expansion-panel-header>
@@ -22,51 +22,30 @@
 </template>
 
 <script>
+import db from "../js/fb";
 export default {
   data() {
     return {
-      projects: [
-        {
-          title: "Design a new website",
-          person: "The Net Ninja",
-          due: "1st Jan 2019",
-          status: "ongoing",
-          content:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis voluptatem natus possimus corrupti, repellat sequi non. Suscipit pariatur, ab molestias, nemo nam dolor minus harum optio iste maxime sunt similique?",
-        },
-        {
-          title: "Code up the homepage",
-          person: "Chun Li",
-          due: "10th Jan 2019",
-          status: "complete",
-          content:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis voluptatem natus possimus corrupti, repellat sequi non. Suscipit pariatur, ab molestias, nemo nam dolor minus harum optio iste maxime sunt similique?",
-        },
-        {
-          title: "Design video thumbnails",
-          person: "Ryu",
-          due: "20th Dec 2018",
-          status: "complete",
-          content:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis voluptatem natus possimus corrupti, repellat sequi non. Suscipit pariatur, ab molestias, nemo nam dolor minus harum optio iste maxime sunt similique?",
-        },
-        {
-          title: "Create a community forum",
-          person: "Gouken",
-          due: "20th Oct 2018",
-          status: "overdue",
-          content:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis voluptatem natus possimus corrupti, repellat sequi non. Suscipit pariatur, ab molestias, nemo nam dolor minus harum optio iste maxime sunt similique?",
-        },
-      ],
+      projects: [],
     };
   },
   computed: {
     myprojects() {
       return this.projects.filter((project) => {
-        return project.person === "The Net Ninja";
+        return project.person === "Francis Paterno";
       });
     },
+  },
+  created() {
+    db.collection("projects").onSnapshot((res) => {
+      const changes = res.docChanges();
+
+      changes.forEach((change) => {
+        if (change.type === "added") {
+          this.projects.push({ ...change.doc.data(), id: change.doc.id });
+        }
+      });
+    });
   },
 };
 </script>

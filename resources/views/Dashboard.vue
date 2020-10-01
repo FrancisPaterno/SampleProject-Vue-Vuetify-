@@ -4,8 +4,15 @@
     <v-container class="my-5">
       <v-layout row class="mb-3">
         <v-tooltip top>
-          <template v-slot:activator="{on,attrs}">
-            <v-btn small text color="grey" @click="sortBy('title')" v-bind="attrs" v-on="on">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              small
+              text
+              color="grey"
+              @click="sortBy('title')"
+              v-bind="attrs"
+              v-on="on"
+            >
               <v-icon left small>fa-folder</v-icon>
               <span class="caption text-lowercase">By project</span>
             </v-btn>
@@ -14,8 +21,15 @@
         </v-tooltip>
 
         <v-tooltip top>
-          <template v-slot:activator="{on,attrs}">
-            <v-btn small text color="grey" @click="sortBy('person')" v-bind="attrs" v-on="on">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              small
+              text
+              color="grey"
+              @click="sortBy('person')"
+              v-bind="attrs"
+              v-on="on"
+            >
               <v-icon left small>fa-user-alt</v-icon>
               <span class="caption text-lowercase">By person</span>
             </v-btn>
@@ -23,7 +37,7 @@
           <span>Sort projects by person</span>
         </v-tooltip>
       </v-layout>
-      <v-card flat v-for="project in projects" :key="project.title">
+      <v-card flat v-for="project in projects" :key="project.id">
         <v-layout row wrap :class="`pa-3 project ${project.status}`">
           <v-flex xs12 md6 flex-column>
             <div class="caption grey--text">{{ project.title }}</div>
@@ -41,10 +55,9 @@
             <div class="mr-5">
               <v-chip
                 small
-                :class="
-                                    `white--text caption my-2 v-chip--${project.status}`
-                                "
-              >{{ project.status }}</v-chip>
+                :class="`white--text caption my-2 v-chip--${project.status}`"
+                >{{ project.status }}</v-chip
+              >
             </div>
           </v-flex>
         </v-layout>
@@ -55,49 +68,29 @@
 </template>
 
 <script>
+import db from "../js/fb";
+
 export default {
   data() {
     return {
-      projects: [
-        {
-          title: "Design a new website",
-          person: "The Net Ninja",
-          due: "1st Jan 2019",
-          status: "ongoing",
-          content:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis voluptatem natus possimus corrupti, repellat sequi non. Suscipit pariatur, ab molestias, nemo nam dolor minus harum optio iste maxime sunt similique?",
-        },
-        {
-          title: "Code up the homepage",
-          person: "Chun Li",
-          due: "10th Jan 2019",
-          status: "complete",
-          content:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis voluptatem natus possimus corrupti, repellat sequi non. Suscipit pariatur, ab molestias, nemo nam dolor minus harum optio iste maxime sunt similique?",
-        },
-        {
-          title: "Design video thumbnails",
-          person: "Ryu",
-          due: "20th Dec 2018",
-          status: "complete",
-          content:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis voluptatem natus possimus corrupti, repellat sequi non. Suscipit pariatur, ab molestias, nemo nam dolor minus harum optio iste maxime sunt similique?",
-        },
-        {
-          title: "Create a community forum",
-          person: "Gouken",
-          due: "20th Oct 2018",
-          status: "overdue",
-          content:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis voluptatem natus possimus corrupti, repellat sequi non. Suscipit pariatur, ab molestias, nemo nam dolor minus harum optio iste maxime sunt similique?",
-        },
-      ],
+      projects: [],
     };
   },
   methods: {
     sortBy(prop) {
       this.projects.sort((a, b) => (a[prop] < b[prop] ? -1 : 1));
     },
+  },
+  created() {
+    db.collection("projects").onSnapshot((res) => {
+      const changes = res.docChanges();
+
+      changes.forEach((change) => {
+        if (change.type === "added") {
+          this.projects.push({ ...change.doc.data(), id: change.doc.id });
+        }
+      });
+    });
   },
 };
 </script>
